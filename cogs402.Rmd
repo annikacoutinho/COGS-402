@@ -1,0 +1,732 @@
+---
+title: Using Social Relations Modelling and Social Network Analysis to Examine the
+  Interpersonal Dynamics of Teamwork in Sport
+output:
+  pdf_document: default
+  html_notebook: default
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+# Section 1: Concept of network-based analyses
+
+When examining the psychological processes within teams, research has traditionally relied on two primary levels of analysis. Constructs are often assessed at the personal, or individual, level (e.g., self-reports of confidence, individual performance, etc.) or the group level (e.g., perceptions of the team as a whole, such as its unity, teamwork, etc.). While these approaches yield valuable insights into individual experiences and collective perceptions, they risk oversimplifying the complex interplay of relationships that define teams.
+
+Recently, researchers have begun to examine constructs through an interpersonal lens (Evans & Benson, 2024; Verresen et al., 2025). This perspective recognizes that a team's functioning is the cumulative result of specific, unique interactions between every *dyad* (pair) of individuals. These dyadic relationships differ fundamentally from isolated individual perceptions and general group perceptions, offering a powerful method to study the microdynamics that underpin team effectiveness.
+
+To capture these subtle yet crucial relational phenomena, it is necessary to conceptualize this network. Teamwork, in this view, is conceptualized as operating throughout a network of individuals nested within teams. This allows researchers to move beyond aggregate scores and evaluate how individual team members contribute to group processes and how the patterns of relationships across the team relate to individual and collective outcomes.
+
+This paper will utilize two  network-based methods capable of studying these microdynamics:
+
+1. Social Relations Modeling (SRM): SRM serves as both a theoretical framework and a statistical approach for analyzing and identifying distinct sources of variation in interpersonal ratings. By placing an emphasis on dyadic behaviour, SRM aims to better understand how people perceive and behave in relation to others. SRM assumes that every person has a unique vantage point in relation to their interactions with others and that aggregating peer-ratings takes into account multiple sources of variance. These sources of variance are as follows:
+
++ 1.1 Target Variance: The variance in ratings due to the general tendency of the person being rated (e.g., Player 1 possesses strong social skills and is consistently rated highly by others, reflecting her positive reputation for cooperation).
+
++ 1.2 Perceiver Variance: The variation in ratings due to the general tendencies of how individuals evaluate others (e.g., Player 2 tends to rate others less favorably, while Player 3 tends to view others in a positive light).
+
++ 1.3 Relationship Variance: The unique variance residing at the dyadic level, capturing the distinct patterns of social behaviour and specific relationship between a pair of individuals (e.g., the particularly high teamwork rating between Player 1 and Player 2, above and beyond their general tendencies).
+
+
+2. Social Network Analysis (SNA): SNA involves the collection and analysis of data concerning the relations or interactions (or "ties") between people (or "nodes") studied in context (Evans & Benson, 2024). While SNA does not partition variance like SRM, it places special meaning on the structure of the network or one's position in it. This includes two different approaches: 
+
++ 2.1 Extraction (descriptive) analysis: Measuring properties of the overall structure, such as Network Density (overall strength of ties across the team) and Network Centralization (the distribution of those ties, identifying influential members).
+
++ 2.2 Embedded (inferential) analysis: Predicting the presence or strength of ties between individuals using advanced methods, which provide insight into how participant behaviours or states are affected by the network structure.
+
+
+In this primer paper, I will explain how to examine teamwork from a microdynamics perspective. I will be using a dataset derived from the Multidimensional Inventory of Network-based Teamwork (MINT) questionnaire in a competitive sport context (link to dataset). More specifically, I will provide step-by-step instructions for implementing Social Relations Modeling (SRM) to partition variance and test dyadic hypotheses, and Social Network Analysis (SNA) to carry out extraction analysis within the R programming environment.
+
+
+# Section 2: Background of study
+
+Teamwork is vital for team effectiveness across various domains, including sport, military, and healthcare. Within sport, previous research has consistently shown that effective teamwork is a strong positive predictor of both group consequences (e.g., team cohesion, collective efficacy) and individual consequences (e.g., athlete satisfaction, thriving).
+
+The theoretical foundation for this research stems from the conceptual framework developed by McEwan and Beauchamp (2014), who defined teamwork as: “a collaborative effort by team members to effectively carry out the independent and interdependent behaviours that are required to maximize a team’s likelihood of achieving its purposes.” This definition stresses that teamwork is an action exhibited by and between constituent members, not just a static state of the team as a whole.
+
+This framework outlines the five components that make up teamwork:
+
+1. Preparation: Behaviours occurring in advance of team tasks (e.g., strategizing).
+
+2. Execution: Behaviours that occur while the team is carrying out its tasks (e.g., communication).
+
+3. Evaluation: Reflections on the team’s previous execution (e.g., performance monitoring).
+
+4. Adjustment: Behaviours corresponding to ways the team’s performance can be improved (e.g., problem solving).
+
+5. Management of Team Maintenance (MTM): Focuses on the resolution of personal or interpersonal issues that arise (e.g., managing conflict).
+
+Traditional approaches to measuring teamwork are limited because they treat the construct only at the group level. 
+
+To address this, we propose a network conceptualization of teamwork. By collecting a full matrix of interpersonal ratings, we can use statistical methods like Social Relations Modeling (SRM) and Social Network Analysis (SNA) to examine the interpersonal dynamics of teamwork in sport.
+
+
+The objectives of this study are:
+
+1. To gain detailed insight into the interpersonal microdynamics that unfold between members of sports teams (i.e., dyadic effects) and across the entire team network.
+
+2. To understand how these individual and relational processes relate to other salient variables in sport, such as performance, well-being, and confidence.
+
+
+
+To examine the microdynamics of teamwork (i.e., individual, interpersonal, and composite/group effects), three sets of hypotheses will be tested in this research.
+
+These hypotheses examine the "microdynamics" of teamwork across three distinct levels of analysis: the individual, interpersonal, and the group.
+
+1. Individual Contributions (SRM Effects)
+
+This tests how an athlete's consistent tendencies in giving or receiving ratings predict their personal outcomes.
+
++ 1a: Individuals who consistently rate teammates highly (Perceiver Effect) and individuals who are consistently rated highly by teammates (Target Effect) will have higher individual scores.
+
+2. Interpersonal Dynamics (SRM Reciprocity and Correlation)
+
+These hypotheses address the specific, unique relationships between teammates (the dyad).
+
++ 2a (Reciprocity): Perceptions of teamwork will be generally reciprocated between pairs of teammates.
+
++ 2b (Dyadic Correlation): The unique, interpersonal rating of teamwork will be positively correlated with the unique, interpersonal rating of role efficacy.
+
++ 2c (Multilevel Effect): A high degree of reciprocal teamwork ratings throughout a team will positively predict Collective Efficacy.
+
+3. Team Network Structure (SNA Metrics)
+
+This focuses on the overall pattern and distribution of teamwork behaviors across the entire group.
+
++ 3a: Teamwork behaviors, as measured by Network Density (overall level of teamwork) and Network Centralization (distribution of teamwork), will significantly predict team outcomes such as Collective Efficacy and subjective team performance.
+
+
+# Section 3: How to conduct network-based analyses in R
+
+## Setting up our environment 
+
+### Loading our packages 
+
+First, I would recommend using an R Notebook to carry out your work. Once you have started an active session in R, we are going to install the packages we need, and then load them into our library. You should now be able to see them on the right of your screen, in the packages drop-down. There should be a tick mark next to these libraries. If there are ever any issues you run into, you can type help("package name") into your console, and some information will pop up in that right hand window. You can also click on the package name where you see it in the list, and you get a view of the documentation for that package. This can be really helpful to get a description of the package, some useful functions, and other documentation. 
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyselect)
+library(stringr)
+library(dbplyr)
+library(TripleR)
+```
+
+### Importing the dataset
+
+In this case, the dataset was an Excel file containing 19 sheets - with one team per sheet. Since each team had different numbers of players, I imported each sheet separately. Once you have saved the Excel file to your computer as a .csv file, you can use the following code to read in the data file. I have included the code below for one team - with the other teams not included in this view since it is essentially a repetition. You would only change the name of the dataframe (df1 in this case) and the name of the file (team1.csv in this case) for any other teams.
+
+```{r}
+df1 <- read.csv(
+  "~/Desktop/team1.csv",
+  header=TRUE,skip=1, # This skips the first row above the header since it is empty, so feel free to skip more rows as needed
+  na.strings=c("NA", " ", "", "-99")) # This tells it what is a non-response in the dataset, can include more 
+# than what is currently in the dataset, but you can add others to accommodate your identifiers for non-responses
+```
+
+
+```{r, echo=FALSE}
+df2 <- read.csv(
+  "~/Desktop/team2.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99"))  
+
+df3 <- read.csv(
+  "~/Desktop/team3.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99"))   
+
+df4 <- read.csv(
+  "~/Desktop/team4.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df5 <- read.csv(
+  "~/Desktop/team5.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df6 <- read.csv(
+  "~/Desktop/team6.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df7 <- read.csv(
+  "~/Desktop/team7.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df8 <- read.csv(
+  "~/Desktop/team8.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df9 <- read.csv(
+  "~/Desktop/team9.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df10 <- read.csv(
+  "~/Desktop/team10.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df11 <- read.csv(
+  "~/Desktop/team11.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df12 <- read.csv(
+  "~/Desktop/team12.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df13 <- read.csv(
+  "~/Desktop/team13.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df14 <- read.csv(
+  "~/Desktop/team14.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df15 <- read.csv(
+  "~/Desktop/team15.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df16 <- read.csv(
+  "~/Desktop/team16.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df17 <- read.csv(
+  "~/Desktop/team17.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df18 <- read.csv(
+  "~/Desktop/team18.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+df19 <- read.csv(
+  "~/Desktop/team19.csv",
+  header=TRUE,skip=1,
+  na.strings=c("NA", " ", "", "-99")) 
+
+
+```
+
+
+Now that we have imported each team separately, we need to create a single list of all the data frames. 
+
+```{r}
+team_data_list <- list(
+  df1 = df1, df2 = df2, df3 = df3, df4 = df4, 
+  df5 = df5, df6 = df6, df7 = df7, df8 = df8, 
+  df9 = df9, df10 = df10, df11 = df11, df12 = df12,
+  df13 = df13, df14 = df14, df15 = df15, df16 = df16,
+  df17 = df17, df18 = df18, df19 = df19
+)
+```
+
+### Converting the data into "long" form
+
+SRM needs the data in a "long" (dyadic) format where each row is a single rating (Perceiver_ID, Target_ID, Rating_Value). The files that in this dataset are in a "wide" format, so these must be converted to "long" form before all files can be merged into one. This function will convert a single "wide" form dataframe into "long" form. Comments will be included to explain the process happening behind this function.
+
+```{r}
+convert_team_to_long <- function(df_wide) {
+  
+  all_cols <- colnames(df_wide)
+  rating_cols <- all_cols[
+    str_detect(all_cols, "_\\d+$") 
+  ] # This identifies which columns are peer-ratings (ending in _1, _2, etc.)
+  id_and_scored_cols <- setdiff(all_cols, rating_cols)# This identifies the non-rating columns such as age
+  
+   player_id_col_name <- id_and_scored_cols[2] # This identifies the actual column name for the Perceiver ID (assumed to be the second non-rating column)
+  
+  # Before we make the 'pivot' from "wide" format to "long", we need to clean the data up more by standardizing types and removing incomplete rows 
+ 
+  df_wide_standardized <- df_wide %>%
+    mutate(across(all_of(rating_cols), as.numeric)) %>% # This ensures all rating columns are treated as numeric scores
+    filter(!is.na(!!sym(player_id_col_name))) # This removes rows where Player_ID is NA)
+  
+  df_long_final <- df_wide_standardized %>%
+    pivot_longer(
+      cols = all_of(rating_cols),
+      names_to = "Source_Column", 
+      values_to = "Rating_Value"
+    ) %>%
+    mutate(
+       Correct_Team_ID = str_extract(!!sym(player_id_col_name), "^[^_]+"), # This extracts the Team ID from the Perceiver's Player_ID (e.g., '19' from '19_13')
+      
+      Target_Num = str_extract(Source_Column, "_(\\d+)$") %>% str_remove("_"), # This extracts the target's numerical part (e.g., '1' from 'NA_1')
+      
+      Correct_Target_ID = paste0(Correct_Team_ID, "_", Target_Num), # This creates the full, unique Target ID (e.g., '19_1')
+      
+      behaviour = str_remove(Source_Column, "_\\d+$"), # This extracts the behaviour (e.g., 'Prep2')
+      
+      Player_ID = !!sym(player_id_col_name) # This renames the Player ID column using the extracted name
+    ) %>%
+    select(
+      Team_ID = Correct_Team_ID,
+      Player_ID, 
+      Target_ID = Correct_Target_ID,
+      behaviour, 
+      Rating_Value,  # This selects all of the columns in the order we would like them in 
+    
+      all_of(setdiff(id_and_scored_cols, c(id_and_scored_cols[1], id_and_scored_cols[2]))), # This includes all other columns from the original wide data
+      
+      -Source_Column, -Target_Num, -any_of(id_and_scored_cols[1]) # This removes temporary and unused columns (like the original NA Team_ID)
+    )
+  
+  return(df_long_final) # Now we have our data in "long" format, hurrah!
+}
+```
+
+Using the function we have created in the previous code block, we can apply the function to all the teams using the list we created earlier. 
+```{r}
+long_team_list <- lapply(team_data_list, convert_team_to_long)
+```
+
+Now that all the teams have been converted to "long" form, we can combine all the long data frames into one data frame. And now we are ready for SRM!
+```{r}
+final_long_df <- bind_rows(long_team_list)
+```
+
+### Conducting SRM 
+
+First, we want to check that our library has been loaded and set our labels for a more convenient output.
+```{r}
+library(TripleR) # if you are starting a new R session, you may have to load the library in again 
+RR.style("perception") # This sets the labels in outputs to "perception style"
+```
+
+Now, we are going to create a function in order filter our data properly and run SRM.
+
+```{r}
+
+run_srm_for_behaviour <- function(behaviour_name, df) {
+  
+  df_filtered <- df %>%
+    filter(behaviour == behaviour_name)  # This filters the long data to include only the current behaviour (e.g., "Prep2" ratings)
+  
+ 
+  if (nrow(df_filtered) == 0) {
+    message(paste0("Skipping SRM for ", behaviour_name, ": No rating data found after filtering.")) # This means that if no data is found for this behaviour, the analysis is skipped
+    return(NULL) # This exits the function
+  }
+  
+  df_cleaned <- df_filtered %>%
+    mutate(
+      Team_ID = as.factor(as.character(Team_ID)),
+      Player_ID = as.factor(as.character(Player_ID)),
+      Target_ID = as.factor(as.character(Target_ID))
+    ) # This converts the ID columns to factor types because the TripleR package needs this to identify groups/individuals since this is a multi-group analysis 
+  
+  df_final_srm <- as.data.frame(df_cleaned)
+  
+  RR_result <- RR(
+    Rating_Value ~ Player_ID * Target_ID | Team_ID, 
+    data = df_final_srm,
+    na.rm = TRUE, # This handles any missing ratings 
+    
+  ) # This last part uses the formula for the SRM as seen in the T: Rating_Value ~ Perceiver * Target | Group_ID
+  
+  return(RR_result) # This returns the full SRM results object
+}
+```
+
+
+```{r}
+
+peer_rated_behaviours <- c("Prep2", "Exec2", "Eval1", "Adj1", "mtm1", "RoleEff") # This list specifies the six behaviours to run SRM on.
+
+SRM_Results_6_behaviours <- lapply(
+  peer_rated_behaviours, 
+  run_srm_for_behaviour, 
+  df = final_long_df
+) # This runs the run_srm_for_behaviour function for every behaviour, and creates a list containing 6 complete SRM models
+
+names(SRM_Results_6_behaviours) <- peer_rated_behaviours # This names the results list elements so we can access them easier (e.g., SRM_Results_6_behaviours$Prep2)
+
+```
+
+Let us now print the data frames that contain the SRM results for each behaviour.
+```{r}
+SRM_Results_6_behaviours
+```
+### Preliminary findings
+
+Let us examine the basic statistics for the Preparation aspect of teamwork. The standardized SRM components show how much variance comes from perceivers, targets, and unique dyads.
+
+**Perceiver variance = 0.461**
+Players differ moderately in how strictly or generously they rate their teammates’ preparation. This is the largest component, meaning rater tendencies strongly influence preparation ratings.
+
+**Target variance = 0.186**
+Players differ somewhat in how prepared they are generally perceived to be, but these differences are smaller than perceiver effects.
+
+**Relationship variance = 0.353**
+Preparation ratings depend substantially on the unique relationship between two players. How prepared *I* think *you* are is partly dyad-specific.
+
+**Generalized reciprocity (perceiver–target covariance)** = –0.140 
+Players who rate others as more prepared are not generally seen as more prepared themselves. Little to no generalized reciprocity in Preparation.
+
+**Dyadic reciprocity (relationship covariance)** = 0.101 (p = .002)
+There is significant mutuality at the dyad level: if Player 1 views Player 2 as well-prepared, 2 tends to view 1 as well-prepared too.
+
+
+We can also make various plots of our results. Here is an example of one:
+
+```{r}
+plot(SRM_Results_6_behaviours$Prep2)
+```
+Let us interpret this graph together:
+
+The plot shows absolute (co)variance estimates for each team.
+
++ Each grey dot = one group’s estimate.
+
++ Dot size = group size.
+
++ Green dots = overall weighted estimates.
+
++ Higher positions on the y-axis indicate larger standardized effects.
+
+Perceiver effects plot highest, relationship effects moderately high, target effects lower. Dyadic reciprocity is consistently positive; generalized reciprocity clusters around zero.
+
+
+
+This analysis uses univariate analysis, which estimates perceiver, target, relationship variance, and reciprocity for one behaviour at a time.
+
+To study correlations between behaviours, we would need a bivariate analysis.
+
+The remaining teamwork behaviours (e.g., Execution) can be analyzed in the same way by interpreting their standardized perceiver, target, and relationship variances, plus their reciprocity estimates.
+
+
+### Correlations with other variables
+
+Now, we would like to calculate the correlation between our results from the code above with other external variables included in our dataset (such as Individual Scores). To do so, we need to first extract the Perceiver and Target effects from our SRM models, and merge them with the external variables. Then we can generate a correlation matrix. We will create a function to do this:
+
+```{r}
+extract_srm_effects <- function(rr_object, behaviour_name) {
+  if (is.null(rr_object)) {
+    return(NULL)
+  }
+  
+  effects_df <- rr_object$effects 
+  
+  perceiver_col <- "Rating_Value.p"
+  target_col <- "Rating_Value.t"  # The TripleR RR() function names the effects columns 'Rating_Value.p' and 'Rating_Value.t' inside the $effects data frame so we are using these names
+  
+  df <- effects_df %>% 
+    select(
+      Player_ID = id, 
+      Perceiver_Effect = all_of(perceiver_col), 
+      Target_Effect = all_of(target_col)
+    ) %>%
+    rename_with(
+      .fn = ~paste0(behaviour_name, "_", .x), 
+      .cols = c(Perceiver_Effect, Target_Effect)  # This renames the generic columns using the specific behaviour_name (e.g., Prep2) 
+    # so they can all be merged without conflicting names.
+    )
+  df <- df %>% mutate(Player_ID = as.character(Player_ID)) # This converts the Player_ID back to character for merging
+  
+  return(df)
+}
+
+effects_list <- lapply(
+  names(SRM_Results_6_behaviours), 
+  function(name) {
+    extract_srm_effects(SRM_Results_6_behaviours[[name]], name)
+  } # This extracts the effects for all 6 behaviours and stores them in a list
+)
+
+first_non_null_index <- which(!sapply(effects_list, is.null))[1]
+
+if (is.na(first_non_null_index)) {
+  stop("No valid SRM results were generated for correlation.")
+} # This filters out null results 
+
+all_effects_df <- effects_list[[first_non_null_index]]
+
+for (i in (first_non_null_index + 1):length(effects_list)) {
+  current_effects <- effects_list[[i]]
+  if (!is.null(current_effects)) {
+    all_effects_df <- all_effects_df %>%
+      left_join(current_effects, by = "Player_ID")
+  } # This merges all extracted data frames
+}
+```
+
+```{r}
+external_vars_cols <- final_long_df %>%
+  select(Player_ID, starts_with("t2CE"), TeamPerf, IndPerf) %>%
+  distinct() %>%
+  mutate(
+    Collective_Efficacy = rowMeans(select(., starts_with("t2CE")), na.rm = TRUE), # This averages the four Collective Efficacy items
+    Individual_Performance = IndPerf,
+    Team_Score = TeamPerf,
+    Player_ID = as.character(Player_ID)
+  ) %>%
+  select(Player_ID, Collective_Efficacy, Individual_Performance, Team_Score)
+
+master_correlation_df <- all_effects_df %>%
+  left_join(external_vars_cols, by = "Player_ID") # This merges the 12 SRM effects with the 3 external outcomes by Player_ID
+
+srm_effect_cols <- names(master_correlation_df)[grepl("_Effect$", names(master_correlation_df))]
+external_var_cols <- c("Collective_Efficacy", "Individual_Performance", "Team_Score") # This defines the columns for correlation
+
+correlation_matrix_full <- master_correlation_df %>%
+  select(all_of(srm_effect_cols), all_of(external_var_cols)) %>%
+  cor(use = "pairwise.complete.obs") # This calculates the correlation matrix
+
+results_srm_vs_external <- correlation_matrix_full[srm_effect_cols, external_var_cols] # This is so that we only print the part that links SRM effects (rows) to External outcomes (columns)
+```
+
+
+```{r}
+print("CORRELATION RESULTS: SRM EFFECTS vs. EXTERNAL OUTCOMES")
+print(results_srm_vs_external)
+```
+###Interpretation of SRM Correlation Results
+
+The correlation analysis between the extracted Social Relations Model (SRM) effects and the external outcome variables reveals clear, systematic differences in the predictive power of Perceiver Effects (rater's bias/style) versus Target Effects (ratee's reputation/consensus).
+
+## General Trends and The Microdynamics of Teamwork
+
+The results show a consistent pattern across all six teamwork facets:
+
++ Perceiver Effects are stronger predictors of team Outcomes: The Perceiver Effects consistently show moderate positive correlations (~0.16 to ~0.31) with the group-level outcomes, Collective Efficacy and Team Score.
+
++ Target Effects are weak predictors of team outcomes: The Target Effects show very weak or negligible correlations (~0.00 to ~0.09) with Collective Efficacy and Team Score.
+
++ Target Effects are stronger for individual outcomes: Target Effects show their strongest correlations with Individual Performance (~0.13 to ~ 0.26), suggesting that consensus about a member's effectiveness is tied to their personal output.
+
+##Relating Findings to Hypotheses
+
+1. Individual Contributions (Hypothesis 1a)
+
++ H1a: Individuals who consistently rate teammates highly (Perceiver Effect) and individuals who are consistently rated highly by teammates (Target Effect) will have higher individual scores.
+
++ Finding: This hypothesis is strongly supported. Both SRM effects positively correlate with Individual_Performance. The Perceiver Effect suggests that an individual's positive rating disposition is associated with better performance (up to 0.210). Crucially, the Target Effect (consensus of competence) is also strongly associated with individual performance, yielding the highest overall correlation in the table (RoleEff_Target_Effect, 0.259).
+
+2. Interpersonal Dynamics (Hypothesis 2c Context)
+
++ H2c: A high degree of reciprocal teamwork ratings throughout a team will positively predict Collective Efficacy.
+
+*Note: This correlation table does not directly test the dyadic (Reciprocity/Relationship) component of H2c. However, it provides vital context regarding the influence of individual components on the team outcome (Collective_Efficacy).*
+
++ Finding: The data suggests that Collective Efficacy is primarily predicted by the Perceiver Effect (up to 0.228) and is virtually unrelated to the Target Effect. This finding implies that the team's generalized positive perceptual climate (i.e., having members with an individual tendency to see others favorably) is a stronger foundation for collective belief than the reputation of any individual member's competence.
+
+An interesting finding is the Positive Perceptual Bias (Perceiver Effect) - high positive correlations (e.g., 0.312 for Exec2). Teams composed of "positive raters" achieved better objective outcomes.
+
+## Carrying out SNA
+
+In this section, we use Social Network Analysis (SNA) to understand how teamwork behaviours are distributed across the team.
+
+Each peer rating becomes a directed weighted edge (Player → Target, weight = rating), allowing us to visualise and quantify teamwork.
+
+We are computing two types of measures:
+
+1. Individual-level SNA metrics (Centrality Scores)
+
++ In-Strength = total teamwork ratings a player receives → “reputation”
+
++ Out-Strength = total ratings a player gives → “activity”
+
+These indicate which players are seen as highly prepared, engaged, supportive, etc.
+
+2. Team-level SNA metrics
+
+These capture the *overall structure* of teamwork.
+
+Network Density - how many teamwork ties exist out of all possible ties.
++ Higher density = “everyone rates everyone” → more connected teamwork environment.
+
+Network Centralization (In-Degree) - whether teamwork is evenly distributed or concentrated on a few players.
++ High centralization = a few “stars”.
++ Low centralization = teamwork spread out evenly.
+
+We extract these metrics for all teamwork behaviours (Prep2, Exec2, Eval1, Adj1, mtm1, RoleEff) and combine them for:
+
++ Team-level effects
+
++ Correlation with Individual Performance (individual-level effects)
+
+
+First, let's install and load the library we need! While there is a package called "sna", the "igraph" package is much more popular and seen as more robust for carrying out SNA, so that is what we will be using.
+
+```{r}
+library(igraph)
+```
+We are first going to create a function that will prepare the edge list, build a graph, and compute the In-Strength, Out-Strength, Network Density and In-Centralization.
+
+```{r}
+calculate_sna_metrics <- function(data_df, behaviour_name) {
+  
+  sna_data <- data_df %>%
+    filter(behaviour == behaviour_name) %>%
+    select(Player_ID, Target_ID, Rating_Value) %>%
+    filter(Player_ID != Target_ID) %>%
+    drop_na(Rating_Value) %>%
+    rename(from = Player_ID, to = Target_ID, weight = Rating_Value) # This allows us to filter and prepare our edge list
+  
+  g <- graph_from_data_frame(d = sna_data, directed = TRUE) # This creates an igraph object
+
+  centrality_df <- data.frame(
+    Player_ID = V(g)$name,
+    In_Strength = strength(g, mode = "in"),  # In-Strength: Received ratings (Reputation)
+    Out_Strength = strength(g, mode = "out") # Out-Strength: Given ratings (Activity)
+  )
+  
+  names(centrality_df)[2:3] <- paste0(c("In_Strength_", "Out_Strength_"), behaviour_name)   # This renames the columns uniquely so we can merge them later
+  
+  density <- edge_density(g)
+  centralization_in <- centr_degree(g, mode = "in")$centralization
+  
+  return(list(
+    centrality = centrality_df,
+    density = density,
+    centralization = centralization_in,
+    behaviour = behaviour_name 
+  )) # This returns both individual (centrality) and team (density/centralization) metrics
+}
+```
+
+```{r}
+peer_rated_behaviours_all <- c("Prep2", "Exec2", "Eval1", "Adj1", "mtm1", "RoleEff")
+
+all_sna_results <- list()
+all_centrality_dfs <- list()
+
+for (b in peer_rated_behaviours_all) {
+  result <- calculate_sna_metrics(final_long_df, b)
+  all_sna_results[[b]] <- result
+  all_centrality_dfs[[b]] <- result$centrality
+}
+```
+
+```{r}
+
+final_centrality_df <- all_centrality_dfs[[1]]
+for (i in 2:length(all_centrality_dfs)) {
+  final_centrality_df <- merge(final_centrality_df, all_centrality_dfs[[i]], by = "Player_ID", all = TRUE) # This is to consolidate Centrality Scores (for individual performance correlation)
+}
+
+graph_level_summary <- data.frame(
+  behaviour = sapply(all_sna_results, "[[", "behaviour"),
+  Density = sapply(all_sna_results, "[[", "density"),
+  Centralization_In = sapply(all_sna_results, "[[", "centralization")
+) # This is to consolidate Graph-Level Metrics (for team performance correlation)
+
+print("Consolidated Individual Centrality Scores")
+head(final_centrality_df)
+
+print("Consolidated Graph-Level Summary (Hypothesis 3 Metrics)")
+print(graph_level_summary)
+```
+
+Let's interpret the findings above. There are a few key things to note, and then I will discuss how this relates to Hypothesis 3:
+
++ All behaviours have low density, meaning not everyone rates everyone strongly, therefore teamwork ties are present but not extremely high.
+
++ All centralization values are also low, meaning teamwork behaviours are distributed fairly evenly, not dominated by a few star members.
+
++ Role Effectiveness shows slightly more centralization, therefore a few members are seen as more reliably role-effective.
+
+How does this relate to Hypothesis 3? Because density and centralization vary only slightly, we may not expect very strong predictions of team outcomes. Still, these metrics can be used as predictors in the team-level model.
+
+This next step assumes that master_correlation_df contains all individual outcome variables (like Individual_Performance) and final_centrality_df contains the SNA scores.
+
+```{r}
+master_correlation_df <- merge(master_correlation_df, final_centrality_df, by = "Player_ID", all.x = TRUE)  # This merges the new SNA centrality scores into the master dataframe and ensures every Player_ID has their performance score and all their SNA scores
+
+sna_strength_cols <- names(master_correlation_df)[grepl("Strength_", names(master_correlation_df))] # This runs the final correlation test for all six behaviours
+
+individual_outcome_col <- "Individual_Performance"
+
+print("Correlation: SNA Strength vs. Individual Performance")
+
+sna_correlation_results <- master_correlation_df %>%
+  select(all_of(sna_strength_cols), individual_outcome_col) %>%
+  cor(use = "pairwise.complete.obs") # This calculates the correlations
+
+final_individual_sna_correlations <- sna_correlation_results[sna_strength_cols, individual_outcome_col, drop = FALSE] # This makes sure that only the rows correlating the SNA metrics with the outcomes are printed
+
+print(final_individual_sna_correlations)
+```
+Looking at the results above, we see that across all behaviours, the correlations between centrality measures and individual performance are small (r ≈ .03–.15). The strongest effects appear for Out-Strength on Adaptability (Adj1) and Maintain Team Motivation (mtm1), both around r ≈ .15, followed by Out-Strength for Evaluation (Eval1) at roughly r ≈ .11. In-Strength for Role Effectiveness shows a weaker association at about r ≈ .09. Overall, this pattern suggests that players who actively rate, support, and engage with their teammates tend to perform slightly better themselves, whereas simply being rated highly by others has very minimal connection to individual performance. In other words, *activity* (giving ratings) appears to be more relevant to performance outcomes than *reputation* (receiving ratings).
+
+## Visualizing our results
+
+To better understand how teammates evaluate one another on the Preparation behaviour, we can visualize the peer-rating structure as a directed network. Each node represents a player, and each directed edge represents one player’s Prep2 rating of another. Focusing on a single team (Team 1) and behaviour makes the network clearer and allows us to see patterns in how preparation-related evaluations flow within the group. 
+
+In this graph, node size reflects In-Strength (the total amount of Prep2 ratings a player receives), which serves as a proxy for reputation - players seen as more consistently prepared appear larger. Edge width corresponds to the strength of the rating given. By plotting this network, we can visually assess whether the team’s preparation dynamics show hierarchy, imbalance, or a more evenly distributed pattern of mutual evaluation. This can be replicated for the other teams and behaviours. 
+
+```{r}
+
+sna_data_team1 <- final_long_df %>%
+    filter(behaviour == "Prep2", Team_ID == 1) %>% 
+    select(Player_ID, Target_ID, Rating_Value) %>%
+    filter(Player_ID != Target_ID) %>%
+    drop_na(Rating_Value) %>%
+    filter(Rating_Value > 0) %>% 
+    rename(from = Player_ID, to = Target_ID, weight = Rating_Value) # This filters it down to one team and behaviour making the graph much more readable
+
+Prep2_graph_team1 <- graph_from_data_frame(d = sna_data_team1, directed = TRUE)
+
+team1_in_strength <- strength(Prep2_graph_team1, mode = "in", weights = E(Prep2_graph_team1)$weight) # This calculates In-Strength specifically for this small team network
+
+
+V(Prep2_graph_team1)$size <- team1_in_strength * 0.4 + 8 # Slightly larger base size, slightly less scaling
+V(Prep2_graph_team1)$color <- "darkseagreen3" # A more muted, professional color
+V(Prep2_graph_team1)$frame.color <- "gray20" # Node border color
+V(Prep2_graph_team1)$label.color <- "black"
+V(Prep2_graph_team1)$label.cex <- 0.7 # Keep labels at a good size
+
+E(Prep2_graph_team1)$width <- E(Prep2_graph_team1)$weight / 4 # Thinner edges
+E(Prep2_graph_team1)$arrow.size <- 0.25 # Slightly larger arrow for clarity
+E(Prep2_graph_team1)$curved <- 0.15 # Slightly more curve to help separate overlapping edges
+E(Prep2_graph_team1)$color <- adjustcolor("gray50", 0.6) # Lighter, semi-transparent edges
+
+
+plot(Prep2_graph_team1,
+     layout = layout_with_graphopt, 
+     vertex.label = V(Prep2_graph_team1)$name,
+     vertex.label.dist = 1, # This is the distance of the label from node centre
+     vertex.label.degree = -pi/2, # This places the label above node for clarity (adjust as needed)
+     main = "Prep2 Peer Rating Network for Team 1 (Node Size = Reputation)",
+     vertex.label.family = "sans" # Specify font family 
+     ) # This plots the graph!
+
+```
+
+In the Prep2 network, larger nodes represent players who receive more preparation-related ratings, indicating stronger reputational standing for being well-prepared. The nodes form a compact cluster, reflecting a dense web of mutual evaluations within the team. While a few players appear slightly larger - suggesting they are seen as somewhat more consistently prepared - there are no extreme outliers. Edge thickness varies based on rating strength, with thicker edges representing stronger Prep2 evaluations. Overall, the graph shows that Team 1 maintains a balanced preparation dynamic in which most members regard one another as reasonably well-prepared, with no dominant “star” in this behaviour.
+
+
+
+### Conclusion 
+
+Across teams, the peer-rating data shows that members tend to evaluate each other in balanced and reciprocal ways, with only modest differences between individuals. SRM results confirm that most variance comes from relationship effects (how specific pairs view each other), rather than strong personal reputations or biases. This means teamwork dynamics are driven more by dyad-specific interactions than by universally “high-” or “low-rated” individuals.
+
+Centrality–performance correlations are small, but slightly stronger for Out-Strength, suggesting that students who actively evaluate and support others tend to perform a bit better. In contrast, receiving high ratings (In-Strength) relates only weakly to performance.
+
+The Prep2 network visualization fits this overall pattern: a dense, mostly even web of interactions where no single member dominates. Together, the SRM results and SNA patterns suggest that the peer ratings capture collaborative engagement and relationship-level dynamics rather than strong status hierarchies, and their links to performance - while present - are minimal.
+
+
+
+
+
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
